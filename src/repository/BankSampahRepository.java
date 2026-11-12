@@ -7,7 +7,7 @@ import model.Transaksi;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class BankSampahRepository {
     
     // 1. In-memory storage menggunakan Collection Framework
-    private Map<String, Warga> dataWarga = new HashMap<>();
+    private Map<String, Warga> dataWarga = new LinkedHashMap<>();
     private List<Transaksi> riwayatTransaksi = new ArrayList<>();
     private List<String> jenisSampah = Arrays.asList("Plastik", "Kertas", "Logam");
     
@@ -68,7 +68,7 @@ public class BankSampahRepository {
         if (punyaTransaksi) {
             throw new IllegalStateException("Error: Tidak bisa menghapus warga karena memiliki riwayat transaksi.");
         }
-        
+
         dataWarga.remove(idWarga);
     }
 
