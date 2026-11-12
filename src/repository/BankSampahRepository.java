@@ -1,6 +1,7 @@
 package repository;
 
 import model.Warga;
+import model.SaldoTidakCukupException;
 import model.Sampah;
 import model.Transaksi;
 
@@ -53,12 +54,21 @@ public class BankSampahRepository {
 
     public void hapusWarga(String idWarga) {
         // Cek apakah warga memiliki transaksi. Jika ada, tolak penghapusan untuk menjaga riwayat
-        boolean punyaTransaksi = riwayatTransaksi.stream()
-                .anyMatch(t -> t.getIdWarga().equals(idWarga));
+        try {
+            Warga warga = cariWarga(idWarga);
+            if (warga == null) {
+                throw new IllegalArgumentException("Error: Warga tidak ditemukan.");
+            }
+        } catch (IllegalArgumentException e) {
+            throw e; // lempar lagi jika warga tidak ditemukan
+        }
+        
+        boolean punyaTransaksi = riwayatTransaksi.stream().anyMatch(t -> t.getIdWarga().equals(idWarga));
         
         if (punyaTransaksi) {
             throw new IllegalStateException("Error: Tidak bisa menghapus warga karena memiliki riwayat transaksi.");
         }
+        
         dataWarga.remove(idWarga);
     }
 
@@ -69,17 +79,17 @@ public class BankSampahRepository {
         if (warga == null) {
             throw new IllegalArgumentException("Error: Warga tidak ditemukan.");
         }
+        Transaksi transaksi = Transaksi.setor(idWarga, sampah); 
 
         // Polimorfisme: hitungPoin() dipanggil tanpa perlu tahu jenis spesifik sampahnya
-        int poinDidapat = sampah.hitungPoin();
-        warga.tambahPoin(poinDidapat);
+        warga.tambahPoin(transaksi.getPoin());
+        
 
-        // Catat ke riwayat
-        Transaksi transaksi = new Transaksi(autoIncrementIdTransaksi++, idWarga, "SETOR", poinDidapat);
+        transaksi.setId(autoIncrementIdTransaksi++);  
         riwayatTransaksi.add(transaksi);
     }
 
-    public void tukar(String idWarga, int poinTukar) {
+    public void tukar(String idWarga, int poinTukar) throws SaldoTidakCukupException {
         Warga warga = cariWarga(idWarga);
         if (warga == null) {
             throw new IllegalArgumentException("Error: Warga tidak ditemukan.");
@@ -89,7 +99,8 @@ public class BankSampahRepository {
         warga.kurangiPoin(poinTukar);
 
         // Catat ke riwayat
-        Transaksi transaksi = new Transaksi(autoIncrementIdTransaksi++, idWarga, "TUKAR", poinTukar);
+        Transaksi transaksi = Transaksi.tukar(idWarga, poinTukar);
+        transaksi.setId(autoIncrementIdTransaksi++);
         riwayatTransaksi.add(transaksi);
     }
 
