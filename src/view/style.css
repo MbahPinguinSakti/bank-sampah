@@ -1,0 +1,208 @@
+/* ============ Bank Sampah — tema mengikuti mockup design/ ============ */
+
+/* ---- dasar ---- */
+.root {
+    -fx-font-family: "Noto Sans";   /* di Windows bisa ganti "Segoe UI" */
+    -fx-font-size: 13px;
+    -fx-background-color: #F3F5F1;
+    -fx-text-fill: #18211C;
+    -fx-focus-color: #2E7D4F;
+    -fx-faint-focus-color: transparent;
+    -fx-accent: #2E7D4F;
+}
+
+/* ---- header ---- */
+.app-header {
+    -fx-background-color: white;
+    -fx-padding: 18 28 18 28;
+}
+.logo {
+    -fx-background-color: linear-gradient(to bottom right, #3A9A62, #22603C);
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-min-width: 40; -fx-min-height: 40;
+    -fx-alignment: center;
+}
+.app-title    { -fx-font-size: 18px; -fx-font-weight: bold; }
+.app-subtitle { -fx-text-fill: #5F6B64; -fx-font-size: 12px; }
+.stat {
+    -fx-background-color: #F3F5F1;
+    -fx-background-radius: 10;
+    -fx-padding: 8 14 8 14;
+}
+.stat-label { -fx-text-fill: #5F6B64; -fx-font-size: 11px; }
+.stat-value { -fx-font-size: 15px; -fx-font-weight: bold; }
+
+/* ---- tab pane ---- */
+.tab-pane > .tab-header-area {
+    -fx-padding: 0 24 0 24;
+}
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: white, #E1E6DF, white;
+    -fx-background-insets: 0, 0 0 0 0, 0 0 1 0;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 12 14 10 14;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 2.5 0;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-border-color: #2E7D4F;
+}
+.tab .tab-label { -fx-text-fill: #5F6B64; -fx-font-size: 13px; }
+.tab:selected .tab-label { -fx-text-fill: #2E7D4F; -fx-font-weight: bold; }
+.tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator {
+    -fx-border-color: transparent;
+}
+.tab-content { -fx-padding: 24; }
+
+/* ---- kartu ---- */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #E1E6DF;
+    -fx-border-radius: 12;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(24, 33, 28, 0.05), 4, 0, 0, 1);
+}
+.card-title    { -fx-font-size: 15px; -fx-font-weight: bold; }
+.card-subtitle { -fx-text-fill: #5F6B64; -fx-font-size: 12px; }
+
+/* ---- form ---- */
+.field-label { -fx-text-fill: #5F6B64; -fx-font-size: 12px; }
+.hint        { -fx-text-fill: #8A948E; -fx-font-size: 11px; }
+.teks-tebal  { -fx-font-weight: bold; }
+
+.text-field, .combo-box, .text-area {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #CFD6CD;
+    -fx-border-radius: 8;
+}
+.text-field, .combo-box { -fx-pref-height: 38; }
+.text-field { -fx-padding: 0 12 0 12; }
+.text-field:focused, .combo-box:focused, .text-area:focused { -fx-border-color: #2E7D4F; }
+.text-area .content { -fx-background-color: white; -fx-background-radius: 8; -fx-padding: 6 8 6 8; }
+.text-area .scroll-pane { -fx-background-color: transparent; }
+.combo-box .list-cell { -fx-padding: 0 0 0 4; }
+.combo-box .arrow-button { -fx-background-color: transparent; }
+.combo-box .arrow { -fx-background-color: #5F6B64; }
+
+/* ---- tombol ---- */
+.button {
+    -fx-pref-height: 38;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.btn-primary { -fx-background-color: #2E7D4F; -fx-text-fill: white; }
+.btn-primary:hover { -fx-background-color: #22603C; }
+.btn-secondary { -fx-background-color: white; -fx-border-color: #CFD6CD; -fx-text-fill: #18211C; }
+.btn-secondary:hover { -fx-background-color: #F3F5F1; }
+.btn-danger { -fx-background-color: white; -fx-border-color: #F1B8B2; -fx-text-fill: #B42318; }
+.btn-danger:hover { -fx-background-color: #FDECEA; }
+.btn-ghost { -fx-background-color: transparent; -fx-text-fill: #5F6B64; }
+.btn-ghost:hover { -fx-background-color: #F3F5F1; }
+
+/* ---- tabel ---- */
+.table-view {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #E1E6DF;
+    -fx-border-radius: 8;
+    -fx-padding: 0;
+    -fx-table-cell-border-color: transparent;
+}
+.table-view:focused { -fx-background-insets: 0; }
+.table-view .column-header-background { -fx-background-color: #FAFBF9; -fx-background-radius: 8 8 0 0; }
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #E1E6DF transparent;
+    -fx-pref-height: 40;
+}
+.table-view .column-header .label {
+    -fx-text-fill: #5F6B64;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-alignment: center-left;
+    -fx-padding: 0 8 0 8;
+}
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #E1E6DF transparent;
+    -fx-cell-size: 44;
+}
+.table-row-cell:empty { -fx-border-color: transparent; }
+.table-row-cell:selected { -fx-background-color: #EAF4EE; }
+.table-cell { -fx-padding: 0 8 0 8; -fx-alignment: center-left; -fx-text-fill: #18211C; }
+.table-row-cell:selected .table-cell { -fx-text-fill: #18211C; }
+.col-angka, .column-header.col-angka .label { -fx-alignment: center-right; }
+
+/* warna poin & badge */
+.poin-plus  { -fx-text-fill: #2E7D4F; -fx-font-weight: bold; }
+.poin-minus { -fx-text-fill: #C2410C; -fx-font-weight: bold; }
+.badge { -fx-background-radius: 999; -fx-padding: 3 8 3 8; -fx-font-size: 11px; -fx-font-weight: bold; }
+.badge-setor { -fx-background-color: #E6F2EA; -fx-text-fill: #2E7D4F; }
+.badge-tukar { -fx-background-color: #FDECE3; -fx-text-fill: #C2410C; }
+
+/* ---- penimbangan ---- */
+.estimate {
+    -fx-background-color: #E6F2EA;
+    -fx-background-radius: 10;
+    -fx-padding: 16 18 16 18;
+}
+.estimate-title { -fx-text-fill: #22603C; -fx-font-weight: bold; }
+.estimate-value { -fx-text-fill: #22603C; -fx-font-size: 30px; -fx-font-weight: bold; }
+
+.tarif { -fx-background-radius: 10; -fx-padding: 12 14 12 14; }
+.tarif-plastik { -fx-background-color: #E7EEFD; }
+.tarif-kertas  { -fx-background-color: #FBF1DF; }
+.tarif-logam   { -fx-background-color: #ECEEF1; }
+.tarif-garis { -fx-min-width: 6; -fx-max-width: 6; -fx-min-height: 32; -fx-background-radius: 3; }
+.bg-plastik { -fx-background-color: #2563EB; }
+.bg-kertas  { -fx-background-color: #B7791F; }
+.bg-logam   { -fx-background-color: #5B6472; }
+.tarif-nama  { -fx-font-weight: bold; }
+.tarif-angka { -fx-font-size: 18px; -fx-font-weight: bold; }
+.text-plastik { -fx-text-fill: #2563EB; }
+.text-kertas  { -fx-text-fill: #B7791F; }
+.text-logam   { -fx-text-fill: #5B6472; }
+
+/* ---- penukaran ---- */
+.saldo-box {
+    -fx-background-color: linear-gradient(to bottom right, #2E7D4F, #1D5434);
+    -fx-background-radius: 12;
+    -fx-padding: 18 20 18 20;
+}
+.saldo-box .label { -fx-text-fill: #CFE6D7; }
+.saldo-box .saldo-value { -fx-text-fill: white; -fx-font-size: 34px; -fx-font-weight: bold; }
+.ringkasan {
+    -fx-background-color: #F3F5F1;
+    -fx-background-radius: 10;
+    -fx-padding: 14 16 14 16;
+}
+.ringkasan .label { -fx-text-fill: #5F6B64; }
+.ringkasan .teks-tebal { -fx-text-fill: #18211C; }
+.ringkasan .poin-plus  { -fx-text-fill: #22603C; }
+.ringkasan .poin-minus { -fx-text-fill: #C2410C; }
+
+/* ---- riwayat ---- */
+.chip {
+    -fx-pref-height: 32;
+    -fx-padding: 0 14 0 14;
+    -fx-background-color: white;
+    -fx-background-radius: 999;
+    -fx-border-color: #CFD6CD;
+    -fx-border-radius: 999;
+    -fx-text-fill: #5F6B64;
+    -fx-cursor: hand;
+}
+.chip:selected { -fx-background-color: #18211C; -fx-border-color: #18211C; -fx-text-fill: white; -fx-font-weight: bold; }
+.ringkas {
+    -fx-border-color: transparent transparent transparent #E1E6DF;
+    -fx-padding: 0 0 0 14;
+}

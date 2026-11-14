@@ -1,0 +1,6 @@
+{
+    "java.project.sourcePaths": ["src"],
+    "java.project.outputPath": "bank_sampah/out",
+    "java.project.referencedLibraries": ["bank_sampah/lib/**/*.jar", "/home/pinguinstar/Kuliah/smester-3/pbo/otw_uas/bank_sampah/lib/*.jar"]
+}
+    

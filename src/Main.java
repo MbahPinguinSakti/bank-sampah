@@ -1,51 +1,97 @@
+import java.time.LocalDate;
+import java.util.List;
+
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import model.Kertas;
 import model.Logam;
 import model.Plastik;
-import model.Warga;
 import model.Transaksi;
+import model.Warga;
 import repository.BankSampahRepository;
+import view.MainView;
 
-public class Main {
-    public static void main(String[] args) {
-        System.out.println("=== DEMO KONSOL BANK SAMPAH (FASE 1) ===");
-        BankSampahRepository repo = new BankSampahRepository();
+public class Main extends Application {
 
-        // 1. Test Tambah Warga
-        System.out.println("\n[1] Menambahkan Warga...");
-        repo.tambahWarga(new Warga("W001", "Budi Santoso", "Jl. Mawar No 1"));
-        repo.tambahWarga(new Warga("W002", "Siti Aminah", "Jl. Melati No 5"));
-        
-        for (Warga w : repo.semuaWarga()) {
-            System.out.println("- " + w.getIdWarga() + " | " + w.getNama() + " | Saldo: " + w.getSaldoPoin());
-        }
+    private final BankSampahRepository repo = new BankSampahRepository();
 
-        // 2. Test Setor Sampah
-        System.out.println("\n[2] Budi dan Siti menyetor sampah...");
-        repo.setor("W001", new Plastik( 2.0)); // Plastik: misal 10 poin/kg -> 20 poin
-        repo.setor("W002", new Logam( 5.0));       // Logam: 20 poin/kg + bonus 50 (krn >= 5kg) -> 150 poin
-        repo.setor("W001", new Kertas( 4.0));    // Kertas: 5 poin/kg -> 20 poin
+    @Override
+    public void start(Stage stage) {
+        isiDataContoh();
 
-        System.out.println("Saldo Budi sekarang: " + repo.cariWarga("W001").getSaldoPoin());
-        System.out.println("Saldo Siti sekarang: " + repo.cariWarga("W002").getSaldoPoin());
+        MainView view = new MainView();
+        tampilkanData(view);
 
-        // 3. Test Tukar Poin
-        System.out.println("\n[3] Budi menukar 15 poin...");
+        Scene scene = new Scene(view.getRoot(), 1280, 820);
+        scene.getStylesheets().add(getClass().getResource("/view/style.css").toExternalForm());
+
+        stage.setTitle("Bank Sampah");
+        stage.setMinWidth(1000);
+        stage.setMinHeight(680);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    /** Data awal supaya tabel tidak kosong saat diambil screenshot (P11). */
+    private void isiDataContoh() {
+        repo.tambahWarga(new Warga("W001", "Budi Santoso", "Jl. Melati No. 12"));
+        repo.tambahWarga(new Warga("W002", "Siti Aminah", "Jl. Kenanga No. 4"));
+        repo.tambahWarga(new Warga("W003", "Agus Prasetyo", "Jl. Mawar No. 7"));
+        repo.tambahWarga(new Warga("W004", "Dewi Lestari", "Jl. Anggrek No. 21"));
+
+        repo.setor("W001", new Plastik(2.0));
+        repo.setor("W003", new Logam(5.0));
+        repo.setor("W002", new Kertas(4.0));
         try {
-            repo.tukar("W001", 15);
+            repo.tukar("W003", 100);
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println(e.getMessage());
         }
-        System.out.println("Sisa Saldo Budi: " + repo.cariWarga("W001").getSaldoPoin());
+    }
 
-        // 4. Test Riwayat Transaksi
-        System.out.println("\n[4] Riwayat Transaksi Seluruhnya:");
-        for (Transaksi t : repo.semuaTransaksi()) {
-            System.out.println(t.getId() + " | " + t.getTipe() + " | Warga: " + t.getIdWarga() + " | Poin: " + t.getPoin());
-        }
+    /**
+     * Sementara (P11): isi komponen view dengan data dari repository.
+     * Di P12 bagian ini dipindah ke controller dan dipanggil ulang setiap ada perubahan.
+     */
+    private void tampilkanData(MainView view) {
+        List<Warga> warga = repo.semuaWarga();
+        List<Transaksi> transaksi = repo.semuaTransaksi();
+        List<Transaksi> terbaruDulu = transaksi.reversed();
 
-        System.out.println("\n[5] Riwayat Transaksi khusus Budi (W001):");
-        for (Transaksi t : repo.transaksiWarga("W001")) {
-            System.out.println(t.getId() + " | " + t.getTipe() + " | Poin: " + t.getPoin());
-        }
+        // header
+        view.getLblJumlahWarga().setText(String.valueOf(warga.size()));
+        view.getLblTotalPoin().setText(String.valueOf(warga.stream().mapToInt(Warga::getSaldoPoin).sum()));
+        double kgHariIni = transaksi.stream()
+                .filter(t -> t.getTipe() == Transaksi.Tipe.SETOR)
+                .filter(t -> t.getTanggal().toLocalDate().equals(LocalDate.now()))
+                .mapToDouble(Transaksi::getBerat).sum();
+        view.getLblSetoranHariIni().setText(String.format("%.1f kg", kgHariIni));
+
+        // tab Data Warga
+        view.getWargaTab().getTabel().setItems(FXCollections.observableArrayList(warga));
+
+        // tab Penimbangan
+        view.getPenimbanganTab().getCbWarga().setItems(FXCollections.observableArrayList(warga));
+        view.getPenimbanganTab().getCbJenis().setItems(FXCollections.observableArrayList(repo.getJenisSampah()));
+        view.getPenimbanganTab().getTabelHariIni().setItems(FXCollections.observableArrayList(
+                terbaruDulu.stream().filter(t -> t.getTipe() == Transaksi.Tipe.SETOR).toList()));
+
+        // tab Penukaran
+        view.getPenukaranTab().getCbWarga().setItems(FXCollections.observableArrayList(warga));
+
+        // tab Riwayat
+        view.getRiwayatTab().getCbFilterWarga().setItems(FXCollections.observableArrayList(warga));
+        view.getRiwayatTab().getTabel().setItems(FXCollections.observableArrayList(terbaruDulu));
+        view.getRiwayatTab().getLblJumlah().setText(String.valueOf(transaksi.size()));
+        int masuk = transaksi.stream().filter(t -> t.getTipe() == Transaksi.Tipe.SETOR).mapToInt(Transaksi::getPoin).sum();
+        int keluar = transaksi.stream().filter(t -> t.getTipe() == Transaksi.Tipe.TUKAR).mapToInt(Transaksi::getPoin).sum();
+        view.getRiwayatTab().getLblPoinMasuk().setText("+" + masuk);
+        view.getRiwayatTab().getLblPoinKeluar().setText("−" + keluar);
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }

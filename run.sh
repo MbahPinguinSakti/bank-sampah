@@ -12,4 +12,5 @@ fi
 
 rm -rf out
 javac "${FX_OPTS[@]}" -cp "lib/*" -d out $(find src -name "*.java")
+mkdir -p out/view && cp src/view/*.css out/view/     
 java "${FX_OPTS[@]}" -cp "out:lib/*" Main
