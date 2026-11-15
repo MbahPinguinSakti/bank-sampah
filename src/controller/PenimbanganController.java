@@ -4,9 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import javafx.collections.FXCollections;
-import model.Kertas;
-import model.Logam;
-import model.Plastik;
 import model.Sampah;
 import model.Transaksi;
 import model.Warga;
@@ -20,10 +17,13 @@ public class PenimbanganController {
 
     private final PenimbanganTab view;
     private final BankSampahRepository repo;
+    private final Runnable onDataBerubah; // dipanggil setelah data berubah supaya semua tab ikut di-refresh
 
-    public PenimbanganController(PenimbanganTab view, BankSampahRepository repo) {
+    public PenimbanganController(PenimbanganTab view, BankSampahRepository repo, Runnable onDataBerubah) {
         this.view = view;
         this.repo = repo;
+        this.onDataBerubah = onDataBerubah;
+        view.getCbJenis().setItems(FXCollections.observableArrayList(repo.getJenisSampah()));
         view.getBtnSimpan().setOnAction(e -> simpan());
 
         // perkiraan poin dihitung ulang tiap kali jenis atau berat berubah
@@ -45,16 +45,16 @@ public class PenimbanganController {
 
         try {
             double berat = bacaBerat();
-            Sampah sampah = buatSampah(jenis, berat);
+            Sampah sampah = Sampah.buatSampah(jenis, berat);
             repo.setor(warga.getIdWarga(), sampah);
             Ui.info("Setoran berhasil, " + warga.getNama() + " mendapat " + sampah.hitungPoin() + " poin");
             view.getCbWarga().setValue(null);
             view.getCbJenis().setValue(null);
             view.getTfBerat().clear();
-            tampilkanSetoranHariIni();
+            onDataBerubah.run();
         } catch (NumberFormatException ex) {
             Ui.error("Berat harus berupa angka, contoh: 2,5");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             Ui.error(ex.getMessage());
         }
     }
@@ -68,7 +68,7 @@ public class PenimbanganController {
         }
 
         try {
-            Sampah sampah = buatSampah(jenis, bacaBerat());
+            Sampah sampah = Sampah.buatSampah(jenis, bacaBerat());
             view.getLblRumus().setText(sampah.getBerat() + " kg × " + sampah.getPoinPerKg() + " poin/kg");
             view.getLblPerkiraan().setText(String.valueOf(sampah.hitungPoin()));
         } catch (IllegalArgumentException ex) {
@@ -83,17 +83,13 @@ public class PenimbanganController {
         return Double.parseDouble(view.getTfBerat().getText().trim().replace(",", "."));
     }
 
-    /** Polimorfisme: yang dikembalikan selalu bertipe Sampah, isinya Plastik/Kertas/Logam. */
-    private Sampah buatSampah(String jenis, double berat) {
-        return switch (jenis) {
-            case "Plastik" -> new Plastik(berat);
-            case "Kertas" -> new Kertas(berat);
-            case "Logam" -> new Logam(berat);
-            default -> throw new IllegalArgumentException("Jenis sampah tidak dikenal: " + jenis);
-        };
-    }
+    /** Isi ulang ComboBox warga dan tabel setoran hari ini. Dipanggil lewat Main.refreshSemua(). */
+    public void refresh() {
+        Warga dipilih = view.getCbWarga().getValue();
+        List<Warga> semua = repo.semuaWarga();
+        view.getCbWarga().setItems(FXCollections.observableArrayList(semua));
+        view.getCbWarga().setValue(semua.contains(dipilih) ? dipilih : null); // pilihan user jangan hilang
 
-    private void tampilkanSetoranHariIni() {
         List<Transaksi> hariIni = repo.semuaTransaksi().reversed().stream()
                 .filter(t -> t.getTipe() == Transaksi.Tipe.SETOR)
                 .filter(t -> t.getTanggal().toLocalDate().equals(LocalDate.now()))

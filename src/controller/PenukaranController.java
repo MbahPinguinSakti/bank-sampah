@@ -1,5 +1,7 @@
 package controller;
 
+import java.util.List;
+
 import javafx.collections.FXCollections;
 import model.SaldoTidakCukupException;
 import model.Warga;
@@ -13,10 +15,12 @@ public class PenukaranController {
 
     private final PenukaranTab view;
     private final BankSampahRepository repo;
+    private final Runnable onDataBerubah; // dipanggil setelah data berubah supaya semua tab ikut di-refresh
 
-    public PenukaranController(PenukaranTab view, BankSampahRepository repo) {
+    public PenukaranController(PenukaranTab view, BankSampahRepository repo, Runnable onDataBerubah) {
         this.view = view;
         this.repo = repo;
+        this.onDataBerubah = onDataBerubah;
         view.getBtnTukar().setOnAction(e -> tukar());
 
         // ganti warga -> saldo & riwayat ikut berubah; ketik jumlah -> ringkasan ikut berubah
@@ -39,12 +43,21 @@ public class PenukaranController {
             repo.tukar(warga.getIdWarga(), jumlah);
             Ui.info("Penukaran berhasil, sisa saldo " + warga.getSaldoPoin() + " poin");
             view.getTfJumlah().clear();
-            tampilkanWarga();
+            onDataBerubah.run();
         } catch (NumberFormatException ex) {
             Ui.error("Jumlah poin harus berupa angka bulat");
-        } catch (SaldoTidakCukupException | IllegalArgumentException ex) {
+        } catch (SaldoTidakCukupException | IllegalArgumentException | IllegalStateException ex) {
             Ui.error(ex.getMessage());
         }
+    }
+
+    /** Isi ulang ComboBox warga, lalu saldo & riwayat warga terpilih. Dipanggil lewat Main.refreshSemua(). */
+    public void refresh() {
+        Warga dipilih = view.getCbWarga().getValue();
+        List<Warga> semua = repo.semuaWarga();
+        view.getCbWarga().setItems(FXCollections.observableArrayList(semua));
+        view.getCbWarga().setValue(semua.contains(dipilih) ? dipilih : null); // pilihan user jangan hilang
+        tampilkanWarga();
     }
 
     private void tampilkanWarga() {

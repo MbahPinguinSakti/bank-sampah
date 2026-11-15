@@ -25,6 +25,15 @@ public class RiwayatController {
         view.getGrupTipe().selectedToggleProperty().addListener((obs, lama, baru) -> tampilkan());
     }
 
+    /** Isi ulang ComboBox filter, lalu tabel sesuai filter yang aktif. Dipanggil lewat Main.refreshSemua(). */
+    public void refresh() {
+        Warga dipilih = view.getCbFilterWarga().getValue();
+        List<Warga> semua = repo.semuaWarga();
+        view.getCbFilterWarga().setItems(FXCollections.observableArrayList(semua));
+        view.getCbFilterWarga().setValue(semua.contains(dipilih) ? dipilih : null); // filter user jangan hilang
+        tampilkan();
+    }
+
     private void tampilkan() {
         Warga warga = view.getCbFilterWarga().getValue();
         List<Transaksi> data = warga == null

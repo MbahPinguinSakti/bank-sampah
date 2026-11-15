@@ -13,10 +13,12 @@ public class WargaController {
 
     private final WargaTab view;
     private final BankSampahRepository repo;
+    private final Runnable onDataBerubah; // dipanggil setelah data berubah supaya semua tab ikut di-refresh
 
-    public WargaController(WargaTab view, BankSampahRepository repo ) {
+    public WargaController(WargaTab view, BankSampahRepository repo, Runnable onDataBerubah) {
         this.view = view;
         this.repo = repo;
+        this.onDataBerubah = onDataBerubah;
         view.getBtnTambah().setOnAction(e -> tambah());
         view.getBtnHapus().setOnAction(e -> hapus());
         view.getBtnUbah().setOnAction(e -> ubah());
@@ -28,8 +30,6 @@ public class WargaController {
         String nama = view.getTfNama().getText().trim();
         String alamat = view.getTaAlamat().getText().trim();
 
-        // Create new Warga object and add to repository
-        
         try {
             Warga warga = new Warga(id, nama, alamat);
             repo.tambahWarga(warga);
@@ -37,8 +37,8 @@ public class WargaController {
             view.getTfId().clear();
             view.getTfNama().clear();
             view.getTaAlamat().clear();
-            reset();
-        } catch (IllegalArgumentException ex) {
+            onDataBerubah.run();
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             Ui.error(ex.getMessage());
         }
     }
@@ -52,9 +52,9 @@ public class WargaController {
         try{
             if (!Ui.konfirmasi("yakin hapus warga " + warga.getNama())) {
                 return; // user pilih batal
-            }           
+            }
             repo.hapusWarga(warga.getIdWarga());
-            reset();
+            onDataBerubah.run();
         } catch (IllegalArgumentException | IllegalStateException ex) {
             Ui.error(ex.getMessage());
         }
@@ -72,15 +72,15 @@ public class WargaController {
         try {
             repo.ubahWarga(warga.getIdWarga(), namaBaru, alamatBaru);
             Ui.info("Data warga berhasil diubah");
-            reset();
-        } catch (IllegalArgumentException ex) {
+            onDataBerubah.run();
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             Ui.error(ex.getMessage());
         }
     }
 
-    private void reset() {
-        List<Warga> resetList = repo.semuaWarga();
-        view.getTabel().setItems(FXCollections.observableArrayList(resetList));        
-        
+    /** Isi ulang tabel warga dari repository. Dipanggil lewat Main.refreshSemua(). */
+    public void refresh() {
+        List<Warga> semua = repo.semuaWarga();
+        view.getTabel().setItems(FXCollections.observableArrayList(semua));
     }
 }

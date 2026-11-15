@@ -46,11 +46,10 @@ public class TransaksiDAO {
             
             while (rs.next()) {
                 Sampah sampah = null;
-                if (rs.getString("jenis_sampah") != null) {
-                    // Pastikan constructor (String jenis/nama, double berat) ada di class Sampah
-                    // Kalau class Sampah berbentuk abstract, lo mungkin perlu menyesuaikan ini dengan class turunannya.
-                    // Untuk sementara, kita asumsikan bisa di-instantiate atau sesuaikan dengan struktur Sampah lo.
-                    // sampah = new Sampah(rs.getString("jenis_sampah"), rs.getDouble("berat"));
+                String jenis_sampah = rs.getString("jenis_sampah");
+                Double berat = rs.getDouble("berat");
+                if (jenis_sampah != null && berat != null) {
+                    sampah = Sampah.buatSampah(jenis_sampah, berat);
                 }
                 
                 Transaksi t = Transaksi.dariDatabase(

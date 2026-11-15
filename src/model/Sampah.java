@@ -31,4 +31,14 @@ public abstract class Sampah {
     public String toString() {
         return String.format("%s %.2f kg = %d poin", nama, berat, hitungPoin());
     }
+
+    /** Polimorfisme: yang dikembalikan selalu bertipe Sampah, isinya Plastik/Kertas/Logam. */
+    public static Sampah buatSampah(String jenis, double berat) {
+        return switch (jenis) {
+            case "Plastik" -> new Plastik(berat);
+            case "Kertas" -> new Kertas(berat);
+            case "Logam" -> new Logam(berat);
+            default -> throw new IllegalArgumentException("Jenis sampah tidak dikenal: " + jenis);
+        };
+    }
 }
