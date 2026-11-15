@@ -15,6 +15,7 @@ public class Plastik extends Sampah {
 
     @Override
     public int hitungPoin() {
+        // bulatkan lalu konversi ke int
         return (int) Math.round(getBerat() * POIN_PER_KG);
     }
 }

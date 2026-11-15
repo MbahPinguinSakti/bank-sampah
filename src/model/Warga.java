@@ -75,9 +75,11 @@ public class Warga {
         saldoPoin -= poin;
     }
 
-    /** Dipakai JComboBox di GUI supaya yang tampil "ID - Nama". */
+
     @Override
     public String toString() {
+        // dipakai ComboBox untuk menampilkan teks tiap warga
         return idWarga + " - " + nama;
     }
+
 }

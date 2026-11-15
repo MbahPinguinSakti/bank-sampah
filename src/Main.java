@@ -5,6 +5,10 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import controller.PenimbanganController;
+import controller.PenukaranController;
+import controller.RiwayatController;
+import controller.WargaController;
 import model.Kertas;
 import model.Logam;
 import model.Plastik;
@@ -23,6 +27,12 @@ public class Main extends Application {
 
         MainView view = new MainView();
         tampilkanData(view);
+
+        // satu objek repo yang sama dioper ke semua controller
+        new WargaController(view.getWargaTab(), repo);
+        new PenimbanganController(view.getPenimbanganTab(), repo);
+        new PenukaranController(view.getPenukaranTab(), repo);
+        new RiwayatController(view.getRiwayatTab(), repo);
 
         Scene scene = new Scene(view.getRoot(), 1280, 820);
         scene.getStylesheets().add(getClass().getResource("/view/style.css").toExternalForm());
@@ -51,10 +61,7 @@ public class Main extends Application {
         }
     }
 
-    /**
-     * Sementara (P11): isi komponen view dengan data dari repository.
-     * Di P12 bagian ini dipindah ke controller dan dipanggil ulang setiap ada perubahan.
-     */
+
     private void tampilkanData(MainView view) {
         List<Warga> warga = repo.semuaWarga();
         List<Transaksi> transaksi = repo.semuaTransaksi();
