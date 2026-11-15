@@ -34,6 +34,24 @@ public class Transaksi {
         return new Transaksi(idWarga, Tipe.TUKAR, null, poin, LocalDateTime.now());
     }
 
+    // --- TAMBAHAN BARU UNTUK DATABASE ---
+    public static Transaksi dariDatabase(int id, String jenis, String idWarga, 
+                                         Sampah sampah, int poin, LocalDateTime tanggal) {
+        // Konversi String jenis dari DB (SETOR/TUKAR) ke enum Tipe
+        Transaksi t = new Transaksi(idWarga, Tipe.valueOf(jenis), sampah, poin, tanggal);
+        t.setId(id);
+        return t;
+    }
+
+    public String getJenis() {
+        return tipe.name(); // Mengembalikan String "SETOR" atau "TUKAR" untuk DAO
+    }
+
+    public int getPoinAtauNominal() {
+        return poin; // Alias untuk dipanggil oleh DAO
+    }
+    // ------------------------------------
+
     public int getId() {
         return id;
     }

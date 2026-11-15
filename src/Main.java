@@ -5,9 +5,6 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import model.Kertas;
-import model.Logam;
-import model.Plastik;
 import model.Transaksi;
 import model.Warga;
 import repository.BankSampahRepository;
@@ -19,7 +16,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        isiDataContoh();
+        // isiDataContoh() SUDAH DIHAPUS karena data ditarik otomatis dari Database
 
         MainView view = new MainView();
         tampilkanData(view);
@@ -32,23 +29,6 @@ public class Main extends Application {
         stage.setMinHeight(680);
         stage.setScene(scene);
         stage.show();
-    }
-
-    /** Data awal supaya tabel tidak kosong saat diambil screenshot (P11). */
-    private void isiDataContoh() {
-        repo.tambahWarga(new Warga("W001", "Budi Santoso", "Jl. Melati No. 12"));
-        repo.tambahWarga(new Warga("W002", "Siti Aminah", "Jl. Kenanga No. 4"));
-        repo.tambahWarga(new Warga("W003", "Agus Prasetyo", "Jl. Mawar No. 7"));
-        repo.tambahWarga(new Warga("W004", "Dewi Lestari", "Jl. Anggrek No. 21"));
-
-        repo.setor("W001", new Plastik(2.0));
-        repo.setor("W003", new Logam(5.0));
-        repo.setor("W002", new Kertas(4.0));
-        try {
-            repo.tukar("W003", 100);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
     }
 
     /**
