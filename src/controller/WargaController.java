@@ -78,7 +78,6 @@ public class WargaController {
         }
     }
 
-    /** Isi ulang tabel warga dari repository. Dipanggil lewat Main.refreshSemua(). */
     public void refresh() {
         List<Warga> semua = repo.semuaWarga();
         view.getTabel().setItems(FXCollections.observableArrayList(semua));

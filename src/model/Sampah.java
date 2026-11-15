@@ -21,10 +21,8 @@ public abstract class Sampah {
         return berat;
     }
 
-    /** Tarif dasar poin per kg untuk jenis sampah ini */
     public abstract int getPoinPerKg();
 
-    /** Konversi berat sampah menjadi poin;  */
     public abstract int hitungPoin();
 
     @Override

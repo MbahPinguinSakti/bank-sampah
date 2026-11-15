@@ -27,7 +27,6 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        // isiDataContoh() SUDAH DIHAPUS karena data ditarik otomatis dari Database
         wargaController = new WargaController(view.getWargaTab(), repo, this::refreshSemua);
         penimbanganController = new PenimbanganController(view.getPenimbanganTab(), repo, this::refreshSemua);
         penukaranController = new PenukaranController(view.getPenukaranTab(), repo, this::refreshSemua);
@@ -43,34 +42,28 @@ public class Main extends Application {
         stage.setMinHeight(680);
         stage.setScene(scene);
         stage.show();
-
     }
 
     private void refreshSemua(){
         List<Warga> warga = repo.semuaWarga();
-        List<Transaksi> transaksi = repo.semuaTransaksi();   // ← GAK usah dibawa
+        List<Transaksi> transaksi = repo.semuaTransaksi();
 
         // header
-        view.getLblJumlahWarga().setText(String.valueOf(String.valueOf(warga.size())));
+        view.getLblJumlahWarga().setText(String.valueOf(warga.size()));
         view.getLblTotalPoin().setText(String.valueOf(warga.stream().mapToInt(Warga::getSaldoPoin).sum()));
         double kgHariIni = transaksi.stream()
                 .filter(t -> t.getTipe() == Transaksi.Tipe.SETOR)
                 .filter(t -> t.getTanggal().toLocalDate().equals(LocalDate.now()))
                 .mapToDouble(Transaksi::getBerat).sum();
-        
+        view.getLblSetoranHariIni().setText(String.format("%.1f kg", kgHariIni));
+
+        // isi ulang semua tab
         wargaController.refresh();
         penimbanganController.refresh();
         penukaranController.refresh();
         riwayatController.refresh();
-        
-        view.getLblSetoranHariIni().setText(String.format("%.1f kg", kgHariIni));
-
     }
 
-    /**
-     * Sementara (P11): isi komponen view dengan data dari repository.
-     * Di P12 bagian ini dipindah ke controller dan dipanggil ulang setiap ada perubahan.
-     */
     public static void main(String[] args) {
         launch(args);
     }
