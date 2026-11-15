@@ -1,11 +1,5 @@
 package model;
 
-/**
- * Parent class untuk semua jenis sampah.
- * - Abstraksi  : class abstract, tidak bisa dibuat objeknya langsung.
- * - Enkapsulasi: field private, hanya bisa dibaca lewat getter.
- * - Polimorfisme: tiap subclass wajib meng-override hitungPoin().
- */
 public abstract class Sampah {
 
     private final String nama;
@@ -27,14 +21,22 @@ public abstract class Sampah {
         return berat;
     }
 
-    /** Tarif dasar poin per kg untuk jenis sampah ini. */
     public abstract int getPoinPerKg();
 
-    /** Konversi berat sampah menjadi poin; aturannya berbeda per jenis. */
     public abstract int hitungPoin();
 
     @Override
     public String toString() {
         return String.format("%s %.2f kg = %d poin", nama, berat, hitungPoin());
+    }
+
+    /** Polimorfisme: yang dikembalikan selalu bertipe Sampah, isinya Plastik/Kertas/Logam. */
+    public static Sampah buatSampah(String jenis, double berat) {
+        return switch (jenis) {
+            case "Plastik" -> new Plastik(berat);
+            case "Kertas" -> new Kertas(berat);
+            case "Logam" -> new Logam(berat);
+            default -> throw new IllegalArgumentException("Jenis sampah tidak dikenal: " + jenis);
+        };
     }
 }

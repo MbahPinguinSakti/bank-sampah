@@ -5,14 +5,13 @@ import java.util.function.Function;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Alert.AlertType;
 import model.Transaksi;
 
 
@@ -116,5 +115,34 @@ public final class Ui {
             }
         });
         return col;
+    }
+
+    public static void info(String msg){
+        tampilkanAlert(AlertType.INFORMATION, "Informasi", msg);
+    }
+
+    public static void error(String msg){
+        tampilkanAlert(AlertType.ERROR, "Terjadi Kesalahan", msg);
+    }
+    
+    public static void warning(String msg){
+        tampilkanAlert(AlertType.WARNING, "Peringatan", msg);
+    }
+
+    public static boolean konfirmasi(String msg){
+        Alert alert = new Alert(AlertType.CONFIRMATION, msg, ButtonType.YES, ButtonType.NO);
+        alert.setTitle("Konfirmasi");
+        alert.setHeaderText(null);
+        return alert.showAndWait().orElse(ButtonType.NO) == ButtonType.YES;
+        
+    }
+
+    private static void tampilkanAlert(AlertType tipe, String judul, String msg){
+        Alert alert = new Alert(tipe);
+        alert.setAlertType(tipe);
+        alert.setTitle(judul);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+        alert.showAndWait();
     }
 }

@@ -2,9 +2,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
+
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import controller.PenimbanganController;
+import controller.PenukaranController;
+import controller.RiwayatController;
+import controller.WargaController;
 import model.Transaksi;
 import model.Warga;
 import repository.BankSampahRepository;
@@ -12,14 +16,23 @@ import view.MainView;
 
 public class Main extends Application {
 
+
+    private MainView view = new MainView();
+    private WargaController wargaController;
+    private PenimbanganController penimbanganController;
+    private PenukaranController penukaranController;
+    private RiwayatController riwayatController;
+
     private final BankSampahRepository repo = new BankSampahRepository();
 
     @Override
     public void start(Stage stage) {
-        // isiDataContoh() SUDAH DIHAPUS karena data ditarik otomatis dari Database
-
-        MainView view = new MainView();
-        tampilkanData(view);
+        wargaController = new WargaController(view.getWargaTab(), repo, this::refreshSemua);
+        penimbanganController = new PenimbanganController(view.getPenimbanganTab(), repo, this::refreshSemua);
+        penukaranController = new PenukaranController(view.getPenukaranTab(), repo, this::refreshSemua);
+        riwayatController = new RiwayatController(view.getRiwayatTab(), repo);
+        
+        refreshSemua();
 
         Scene scene = new Scene(view.getRoot(), 1280, 820);
         scene.getStylesheets().add(getClass().getResource("/view/style.css").toExternalForm());
@@ -31,14 +44,9 @@ public class Main extends Application {
         stage.show();
     }
 
-    /**
-     * Sementara (P11): isi komponen view dengan data dari repository.
-     * Di P12 bagian ini dipindah ke controller dan dipanggil ulang setiap ada perubahan.
-     */
-    private void tampilkanData(MainView view) {
+    private void refreshSemua(){
         List<Warga> warga = repo.semuaWarga();
         List<Transaksi> transaksi = repo.semuaTransaksi();
-        List<Transaksi> terbaruDulu = transaksi.reversed();
 
         // header
         view.getLblJumlahWarga().setText(String.valueOf(warga.size()));
@@ -49,26 +57,11 @@ public class Main extends Application {
                 .mapToDouble(Transaksi::getBerat).sum();
         view.getLblSetoranHariIni().setText(String.format("%.1f kg", kgHariIni));
 
-        // tab Data Warga
-        view.getWargaTab().getTabel().setItems(FXCollections.observableArrayList(warga));
-
-        // tab Penimbangan
-        view.getPenimbanganTab().getCbWarga().setItems(FXCollections.observableArrayList(warga));
-        view.getPenimbanganTab().getCbJenis().setItems(FXCollections.observableArrayList(repo.getJenisSampah()));
-        view.getPenimbanganTab().getTabelHariIni().setItems(FXCollections.observableArrayList(
-                terbaruDulu.stream().filter(t -> t.getTipe() == Transaksi.Tipe.SETOR).toList()));
-
-        // tab Penukaran
-        view.getPenukaranTab().getCbWarga().setItems(FXCollections.observableArrayList(warga));
-
-        // tab Riwayat
-        view.getRiwayatTab().getCbFilterWarga().setItems(FXCollections.observableArrayList(warga));
-        view.getRiwayatTab().getTabel().setItems(FXCollections.observableArrayList(terbaruDulu));
-        view.getRiwayatTab().getLblJumlah().setText(String.valueOf(transaksi.size()));
-        int masuk = transaksi.stream().filter(t -> t.getTipe() == Transaksi.Tipe.SETOR).mapToInt(Transaksi::getPoin).sum();
-        int keluar = transaksi.stream().filter(t -> t.getTipe() == Transaksi.Tipe.TUKAR).mapToInt(Transaksi::getPoin).sum();
-        view.getRiwayatTab().getLblPoinMasuk().setText("+" + masuk);
-        view.getRiwayatTab().getLblPoinKeluar().setText("−" + keluar);
+        // isi ulang semua tab
+        wargaController.refresh();
+        penimbanganController.refresh();
+        penukaranController.refresh();
+        riwayatController.refresh();
     }
 
     public static void main(String[] args) {
