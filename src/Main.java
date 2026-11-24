@@ -4,13 +4,8 @@ import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import controller.PenimbanganController;
 import controller.PenukaranController;
@@ -21,6 +16,8 @@ import model.Warga;
 import repository.BankSampahRepository;
 import view.LoginView;
 import view.MainView;
+import view.ModernPopup;
+import view.ModernPopup.LangkahSpotlight;
 import view.UiAnimator;
 
 public class Main extends Application {
@@ -39,7 +36,8 @@ public class Main extends Application {
         this.primaryStage = stage;
         stage.setTitle("Bank Sampah");
         stage.setMinWidth(1000);
-        stage.setMinHeight(680);
+        stage.setMinHeight(640);
+        stage.setMaximized(true);
 
         tampilkanLogin();
         stage.show();
@@ -47,7 +45,9 @@ public class Main extends Application {
 
     private void tampilkanLogin() {
         LoginView loginView = new LoginView();
-        Scene scene = new Scene(loginView.getRoot(), 1280, 820);
+        double w = primaryStage.getWidth() > 0 ? primaryStage.getWidth() : 1280;
+        double h = primaryStage.getHeight() > 0 ? primaryStage.getHeight() : 720;
+        Scene scene = new Scene(loginView.getRoot(), w, h);
         scene.getStylesheets().add(getClass().getResource("/view/style.css").toExternalForm());
 
         loginView.getBtnLogin().setOnAction(e -> {
@@ -60,7 +60,7 @@ public class Main extends Application {
             } else {
                 String idInput = loginView.getIdWarga();
                 Optional<Warga> found = repo.semuaWarga().stream()
-                        .filter(w -> w.getIdWarga().equalsIgnoreCase(idInput))
+                        .filter(warga -> warga.getIdWarga().equalsIgnoreCase(idInput))
                         .findFirst();
 
                 if (found.isPresent()) {
@@ -72,7 +72,9 @@ public class Main extends Application {
         });
 
         UiAnimator.inisialisasiInteraktif(loginView.getRoot());
+        UiAnimator.animasiLayarMembesar(loginView.getRoot());
         primaryStage.setScene(scene);
+        primaryStage.setMaximized(true);
     }
 
     private void bukaDashboard(boolean isAdmin, Warga wargaLogin) {
@@ -83,36 +85,85 @@ public class Main extends Application {
         riwayatController = new RiwayatController(view.getRiwayatTab(), repo);
         riwayatController.setWargaLogin(wargaLogin);
 
-        // Tambahkan tombol Keluar (Logout) & badge peran di header
-        Node headerNode = view.getRoot().lookup(".app-header");
-        if (headerNode instanceof HBox headerBox) {
-            Label badgeRole = new Label(isAdmin ? "ADMIN" : "WARGA: " + wargaLogin.getNama());
-            badgeRole.getStyleClass().addAll("badge", isAdmin ? "badge-setor" : "badge-tukar");
+        view.getBtnLogout().setOnAction(e -> tampilkanLogin());
 
-            Button btnLogout = new Button("Keluar");
-            btnLogout.getStyleClass().add("btn-danger");
-            btnLogout.setOnAction(e -> tampilkanLogin());
-
-            HBox userControls = new HBox(10, badgeRole, btnLogout);
-            userControls.setAlignment(Pos.CENTER_RIGHT);
-            headerBox.getChildren().add(userControls);
-        }
-
-        // Batasi tab jika yang login adalah Warga
-        if (!isAdmin) {
-            Node tabNode = view.getRoot().lookup(".tab-pane");
-            if (tabNode instanceof TabPane tabPane && tabPane.getTabs().size() >= 4) {
-                // Hapus tab Data Warga (index 0) & Penimbangan (index 1)
-                tabPane.getTabs().remove(0, 2);
+        view.getBtnTutorial().setOnAction(e -> {
+            if (!isAdmin && wargaLogin != null) {
+                jalankanSpotlightWarga(wargaLogin);
+            } else {
+                ModernPopup.tampilkanAlert(
+                        view.getOverlayRoot(),
+                        ModernPopup.Tipe.INFO,
+                        "Panduan Administrator",
+                        "Gunakan menu Data Warga untuk mengelola anggota, Penimbangan untuk mencatat setoran sampah, dan Riwayat & Resi untuk mencetak struk bukti PDF."
+                );
             }
+        });
+
+        if (!isAdmin && wargaLogin != null) {
+            view.aturModeWarga(wargaLogin.getNama());
         }
 
-        Scene scene = new Scene(view.getRoot(), 1280, 820);
+        double w = primaryStage.getWidth() > 0 ? primaryStage.getWidth() : 1280;
+        double h = primaryStage.getHeight() > 0 ? primaryStage.getHeight() : 720;
+        Scene scene = new Scene(view.getRoot(), w, h);
         scene.getStylesheets().add(getClass().getResource("/view/style.css").toExternalForm());
 
         refreshSemua(isAdmin, wargaLogin);
         UiAnimator.inisialisasiInteraktif(view.getRoot());
+        UiAnimator.animasiLayarMembesar(view.getOverlayRoot());
         primaryStage.setScene(scene);
+        primaryStage.setMaximized(true);
+
+        if (!isAdmin && wargaLogin != null) {
+            jalankanSpotlightWarga(wargaLogin);
+        } else {
+            ModernPopup.tampilkanToast(view.getOverlayRoot(), ModernPopup.Tipe.SUKSES, "Login Berhasil", "Selamat datang kembali, Administrator!");
+        }
+    }
+
+    /**
+     * Menjalankan Spotlight Tutorial dengan area gelap di luar fitur yang disorot + panah animasi.
+     */
+    private void jalankanSpotlightWarga(Warga wargaLogin) {
+        List<LangkahSpotlight> steps = List.of(
+                new LangkahSpotlight(
+                        "TUTORIAL 1 / 4 • RINGKASAN SALDO",
+                        "Pantau Saldo & Setoran Anda",
+                        "Kotak statistik di atas menampilkan total saldo poin aktif Anda serta akumulasi berat sampah yang sudah disetorkan.",
+                        () -> view.getBentoStatsBox(),
+                        view::bukaTabPenukaranWarga
+                ),
+                new LangkahSpotlight(
+                        "TUTORIAL 2 / 4 • MENU PENUKARAN",
+                        "Menu Penukaran Poin",
+                        "Klik menu ini kapan saja jika Anda ingin menukarkan poin tabungan sampah Anda.",
+                        () -> view.getNavPenukaran(),
+                        view::bukaTabPenukaranWarga
+                ),
+                new LangkahSpotlight(
+                        "TUTORIAL 3 / 4 • FORM TUKAR POIN",
+                        "Masukkan Jumlah Poin",
+                        "Akun Anda sudah terpilih otomatis. Cukup ketik jumlah poin yang ingin ditukar pada kolom di kartu ini, lalu klik tombol Tukar Poin.",
+                        () -> {
+                            Node kartuForm = view.getPenukaranTab().getRoot().lookup(".card");
+                            return kartuForm != null ? kartuForm : view.getPenukaranTab().getRoot();
+                        },
+                        view::bukaTabPenukaranWarga
+                ),
+                new LangkahSpotlight(
+                        "TUTORIAL 4 / 4 • RIWAYAT & CETAK PDF",
+                        "Lihat Riwayat & Cetak Resi PDF",
+                        "Buka menu Riwayat & Resi untuk melihat semua transaksi Anda, lalu tekan tombol 'Cetak Resi PDF' di bawah tabel untuk mengunduh struk resmi.",
+                        () -> view.getNavRiwayat(),
+                        view::bukaTabRiwayatWarga
+                )
+        );
+
+        ModernPopup.tampilkanSpotlightTutorial(view.getOverlayRoot(), steps, () -> {
+            view.bukaTabPenukaranWarga();
+            ModernPopup.tampilkanToast(view.getOverlayRoot(), ModernPopup.Tipe.SUKSES, "Siap Digunakan!", "Halo " + wargaLogin.getNama() + ", selamat bertransaksi.");
+        });
     }
 
     private void refreshSemua(boolean isAdmin, Warga wargaLogin) {
@@ -136,7 +187,6 @@ public class Main extends Application {
             UiAnimator.animasiAngkaInt(view.getLblTotalPoin(), totalPoin);
             UiAnimator.animasiAngkaKg(view.getLblSetoranHariIni(), kgHariIni);
         } else if (wargaLogin != null) {
-            // Ambil data terbaru warga yang sedang login
             Warga terbaru = repo.semuaWarga().stream()
                     .filter(w -> w.getIdWarga().equals(wargaLogin.getIdWarga()))
                     .findFirst().orElse(wargaLogin);
@@ -150,7 +200,6 @@ public class Main extends Application {
             UiAnimator.animasiAngkaInt(view.getLblTotalPoin(), terbaru.getSaldoPoin());
             UiAnimator.animasiAngkaKg(view.getLblSetoranHariIni(), kgWarga);
 
-            // Kunci pilihan warga di tab Penukaran Poin agar tetap akun warga yang login
             view.getPenukaranTab().getCbWarga().setItems(FXCollections.observableArrayList(terbaru));
             view.getPenukaranTab().getCbWarga().setValue(terbaru);
             view.getPenukaranTab().getCbWarga().setDisable(true);

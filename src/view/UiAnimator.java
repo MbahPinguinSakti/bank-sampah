@@ -4,7 +4,6 @@ import javafx.animation.*;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
-import javafx.scene.control.TabPane;
 import javafx.util.Duration;
 
 import java.util.List;
@@ -12,46 +11,71 @@ import java.util.List;
 public class UiAnimator {
 
     /**
-     * Memasang semua animasi interaktif (hover, press, tab transition, entrance)
-     * secara otomatis ke seluruh elemen UI di dalam root.
+     * Animasi layar utama membesar (Zoom-In / Expand) saat aplikasi dibuka atau ganti halaman.
+     */
+    public static void animasiLayarMembesar(Node root) {
+        root.setOpacity(0);
+        root.setScaleX(0.92);
+        root.setScaleY(0.92);
+
+        FadeTransition fade = new FadeTransition(Duration.millis(340), root);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+
+        ScaleTransition expand = new ScaleTransition(Duration.millis(380), root);
+        expand.setFromX(0.92);
+        expand.setFromY(0.92);
+        expand.setToX(1.0);
+        expand.setToY(1.0);
+        expand.setInterpolator(Interpolator.SPLINE(0.16, 1, 0.3, 1));
+
+        new ParallelTransition(fade, expand).play();
+    }
+
+    /**
+     * Memasang semua animasi interaktif secara otomatis ke seluruh elemen UI.
      */
     public static void inisialisasiInteraktif(Parent root) {
-        // 1. Animasi transisi saat berpindah tab
-        Node tabNode = root.lookup(".tab-pane");
-        if (tabNode instanceof TabPane tabPane) {
-            pasangAnimasiTab(tabPane);
-        }
-
-        // 2. Efek melayang halus pada kotak statistik header (.stat) & kartu tarif (.tarif)
-        root.lookupAll(".stat").forEach(node -> pasangEfekHoverAngkat(node, -3.0, 1.02));
-        root.lookupAll(".tarif").forEach(node -> pasangEfekHoverAngkat(node, -2.5, 1.015));
-
-        // 3. Efek pegas (spring press & hover) pada semua tombol (.button) dan chip (.chip)
+        root.lookupAll(".stat").forEach(node -> pasangEfekHoverAngkat(node, -4.0, 1.03));
+        root.lookupAll(".tarif").forEach(node -> pasangEfekHoverAngkat(node, -3.0, 1.02));
         root.lookupAll(".button").forEach(UiAnimator::pasangEfekTombol);
         root.lookupAll(".chip").forEach(UiAnimator::pasangEfekTombol);
+        root.lookupAll(".nav-item").forEach(UiAnimator::pasangEfekTombol);
 
-        // 4. Animasi kartu masuk berurutan saat aplikasi pertama kali terbuka
         animasiKartuBerurutan(root);
     }
 
     /**
-     * Animasi perpindahan tab: Fade-In + Slide-Up halus (280ms).
+     * Memunculkan halaman konten dengan kombinasi Scale-Up + Slide-Up halus.
      */
-    public static void pasangAnimasiTab(TabPane tabPane) {
-        tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
-            if (newTab != null && newTab.getContent() != null) {
-                Node content = newTab.getContent();
-                animasiMasuk(content);
-                if (content instanceof Parent parent) {
-                    animasiKartuBerurutan(parent);
-                }
-            }
-        });
+    public static void animasiGantiHalaman(Node node) {
+        node.setOpacity(0);
+        node.setTranslateY(16);
+        node.setScaleX(0.98);
+        node.setScaleY(0.98);
+
+        FadeTransition fade = new FadeTransition(Duration.millis(260), node);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+
+        TranslateTransition slide = new TranslateTransition(Duration.millis(260), node);
+        slide.setFromY(16);
+        slide.setToY(0);
+        slide.setInterpolator(Interpolator.SPLINE(0.22, 1, 0.36, 1));
+
+        ScaleTransition scale = new ScaleTransition(Duration.millis(260), node);
+        scale.setFromX(0.98);
+        scale.setFromY(0.98);
+        scale.setToX(1.0);
+        scale.setToY(1.0);
+
+        new ParallelTransition(fade, slide, scale).play();
+
+        if (node instanceof Parent parent) {
+            animasiKartuBerurutan(parent);
+        }
     }
 
-    /**
-     * Memunculkan elemen dengan transisi Fade + Slide dari bawah ke atas.
-     */
     public static void animasiMasuk(Node node) {
         node.setOpacity(0);
         node.setTranslateY(14);
@@ -63,30 +87,35 @@ public class UiAnimator {
         TranslateTransition slide = new TranslateTransition(Duration.millis(280), node);
         slide.setFromY(14);
         slide.setToY(0);
-        slide.setInterpolator(Interpolator.SPLINE(0.22, 1, 0.36, 1)); // Smooth cubic-bezier
+        slide.setInterpolator(Interpolator.SPLINE(0.22, 1, 0.36, 1));
 
         new ParallelTransition(fade, slide).play();
     }
 
-    /**
-     * Memunculkan setiap .card secara bergelombang (staggered cascade).
-     */
     public static void animasiKartuBerurutan(Parent root) {
         List<Node> cards = root.lookupAll(".card").stream().toList();
         for (int i = 0; i < cards.size(); i++) {
             Node card = cards.get(i);
             card.setOpacity(0);
             card.setTranslateY(18);
+            card.setScaleX(0.97);
+            card.setScaleY(0.97);
 
-            PauseTransition delay = new PauseTransition(Duration.millis(i * 75L));
-            delay.setOnFinished(e -> animasiMasuk(card));
+            PauseTransition delay = new PauseTransition(Duration.millis(i * 70L));
+            delay.setOnFinished(e -> {
+                FadeTransition f = new FadeTransition(Duration.millis(260), card);
+                f.setToValue(1);
+                TranslateTransition t = new TranslateTransition(Duration.millis(260), card);
+                t.setToY(0);
+                ScaleTransition s = new ScaleTransition(Duration.millis(260), card);
+                s.setToX(1.0);
+                s.setToY(1.0);
+                new ParallelTransition(f, t, s).play();
+            });
             delay.play();
         }
     }
 
-    /**
-     * Efek kartu terangkat halus & membesar sedikit saat disorot mouse.
-     */
     public static void pasangEfekHoverAngkat(Node node, double offsetY, double scale) {
         node.setOnMouseEntered(e -> {
             TranslateTransition up = new TranslateTransition(Duration.millis(180), node);
@@ -107,14 +136,11 @@ public class UiAnimator {
         });
     }
 
-    /**
-     * Efek tombol taktil: sedikit membesar saat hover, membal mengecil saat diklik.
-     */
     public static void pasangEfekTombol(Node btn) {
         btn.setOnMouseEntered(e -> {
             ScaleTransition sc = new ScaleTransition(Duration.millis(130), btn);
-            sc.setToX(1.02);
-            sc.setToY(1.02);
+            sc.setToX(1.03);
+            sc.setToY(1.03);
             sc.play();
         });
         btn.setOnMouseExited(e -> {
@@ -124,22 +150,19 @@ public class UiAnimator {
             sc.play();
         });
         btn.setOnMousePressed(e -> {
-            ScaleTransition sc = new ScaleTransition(Duration.millis(90), btn);
-            sc.setToX(0.96);
-            sc.setToY(0.96);
+            ScaleTransition sc = new ScaleTransition(Duration.millis(85), btn);
+            sc.setToX(0.95);
+            sc.setToY(0.95);
             sc.play();
         });
         btn.setOnMouseReleased(e -> {
             ScaleTransition sc = new ScaleTransition(Duration.millis(120), btn);
-            sc.setToX(btn.isHover() ? 1.02 : 1.0);
-            sc.setToY(btn.isHover() ? 1.02 : 1.0);
+            sc.setToX(btn.isHover() ? 1.03 : 1.0);
+            sc.setToY(btn.isHover() ? 1.03 : 1.0);
             sc.play();
         });
     }
 
-    /**
-     * Animasi angka berjalan (rolling counter) untuk statistik integer.
-     */
     public static void animasiAngkaInt(Label label, int target) {
         int awal = 0;
         try {
@@ -163,9 +186,6 @@ public class UiAnimator {
         counter.play();
     }
 
-    /**
-     * Animasi angka berjalan untuk berat sampah (%.1f kg).
-     */
     public static void animasiAngkaKg(Label label, double targetKg) {
         double awal = 0.0;
         try {
