@@ -5,7 +5,6 @@ import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Toggle;
 import javafx.scene.layout.HBox;
@@ -15,6 +14,7 @@ import model.Warga;
 import repository.BankSampahRepository;
 import util.ResiPdfGenerator;
 import view.RiwayatTab;
+import view.Ui;
 
 public class RiwayatController {
 
@@ -104,11 +104,7 @@ public class RiwayatController {
             if (!view.getTabel().getItems().isEmpty()) {
                 terpilih = view.getTabel().getItems().get(0);
             } else {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Data Kosong");
-                alert.setHeaderText(null);
-                alert.setContentText("Belum ada transaksi yang bisa dicetak.");
-                alert.showAndWait();
+                Ui.error("Belum ada transaksi yang bisa dicetak.");
                 return;
             }
         }
@@ -121,12 +117,9 @@ public class RiwayatController {
 
         try {
             ResiPdfGenerator.cetakResi(target, warga);
+            Ui.info("Resi PDF untuk transaksi #" + target.getId() + " (" + warga.getNama() + ") berhasil dicetak!");
         } catch (Exception ex) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Gagal Mencetak Resi");
-            alert.setHeaderText(null);
-            alert.setContentText("Terjadi kesalahan saat membuat PDF: " + ex.getMessage());
-            alert.showAndWait();
+            Ui.error("Terjadi kesalahan saat membuat PDF: " + ex.getMessage());
         }
     }
 }
