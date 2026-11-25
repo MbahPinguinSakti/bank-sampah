@@ -133,7 +133,7 @@ public class ModernPopup {
     /**
      * Tutorial Spotlight Interaktif:
      * Layar lain menjadi gelap, hanya fitur yang ditutorialkan yang terang benderang,
-     * disertai panah memantul & kartu penjelasan di samping fitur tersebut.
+     * disertai panah memantul, maskot wanita pendamping, & kartu penjelasan di samping fitur tersebut.
      */
     public static void tampilkanSpotlightTutorial(StackPane rootOverlay, List<LangkahSpotlight> steps, Runnable onSelesai) {
         if (steps == null || steps.isEmpty()) return;
@@ -176,12 +176,14 @@ public class ModernPopup {
         bounceArrow.setCycleCount(Animation.INDEFINITE);
         bounceArrow.play();
 
-        // Kartu penjelasan di samping fitur
-        VBox card = new VBox(12);
-        card.getStyleClass().add("modal-card");
-        card.setPrefWidth(360);
-        card.setMaxWidth(360);
-        card.setPadding(new Insets(20));
+        // Maskot Perempuan Pendamping Tutorial Warga
+        MascotView maskotTutorial = new MascotView(MascotView.Karakter.WARGA_WANITA, 0.85);
+        maskotTutorial.setPrefWidth(132);
+        maskotTutorial.setMinWidth(132);
+
+        // Kartu penjelasan di samping maskot
+        VBox cardKonten = new VBox(10);
+        HBox.setHgrow(cardKonten, Priority.ALWAYS);
 
         Label lblStep = new Label();
         lblStep.getStyleClass().add("tutorial-pill");
@@ -210,7 +212,16 @@ public class ModernPopup {
         HBox footer = new HBox(8, dotsBox, spacer, btnSkip, btnNext);
         footer.setAlignment(Pos.CENTER);
 
-        card.getChildren().addAll(lblStep, lblJudul, lblDesc, footer);
+        cardKonten.getChildren().addAll(lblStep, lblJudul, lblDesc, footer);
+
+        double cardWidth = 490;
+        HBox card = new HBox(12, maskotTutorial, cardKonten);
+        card.getStyleClass().add("modal-card");
+        card.setAlignment(Pos.CENTER_LEFT);
+        card.setPrefWidth(cardWidth);
+        card.setMaxWidth(cardWidth);
+        card.setPadding(new Insets(16, 20, 16, 12));
+
         spotlightLayer.getChildren().addAll(darkMask, highlightRing, lblPanah, card);
         rootOverlay.getChildren().add(spotlightLayer);
 
@@ -266,8 +277,8 @@ public class ModernPopup {
 
                 lblPanah.setVisible(true);
 
-                // Tentukan apakah kartu ditaruh di kanan, kiri, atau bawah target agar tidak keluar layar
-                if (tx + tw + 430 < W) {
+                // Tentukan posisi kartu + maskot agar tidak keluar layar
+                if (tx + tw + cardWidth + 70 < W) {
                     // Taruh di SEBELAH KANAN fitur
                     lblPanah.setText("⬅");
                     lblPanah.setLayoutX(tx + tw + 12);
@@ -275,13 +286,13 @@ public class ModernPopup {
 
                     card.setLayoutX(tx + tw + 56);
                     card.setLayoutY(Math.max(20, Math.min(ty, H - 250)));
-                } else if (tx - 430 > 0) {
+                } else if (tx - (cardWidth + 70) > 0) {
                     // Taruh di SEBELAH KIRI fitur
                     lblPanah.setText("➡");
                     lblPanah.setLayoutX(tx - 46);
                     lblPanah.setLayoutY(ty + Math.min(th / 2 - 20, 40));
 
-                    card.setLayoutX(tx - 416);
+                    card.setLayoutX(tx - (cardWidth + 56));
                     card.setLayoutY(Math.max(20, Math.min(ty, H - 250)));
                 } else {
                     // Taruh di BAWAH fitur
@@ -289,7 +300,7 @@ public class ModernPopup {
                     lblPanah.setLayoutX(tx + tw / 2 - 16);
                     lblPanah.setLayoutY(ty + th + 8);
 
-                    card.setLayoutX(Math.max(20, Math.min(tx, W - 380)));
+                    card.setLayoutX(Math.max(20, Math.min(tx, W - (cardWidth + 20))));
                     card.setLayoutY(Math.min(ty + th + 48, H - 240));
                 }
             } else {
@@ -299,11 +310,11 @@ public class ModernPopup {
                 );
                 highlightRing.setVisible(false);
                 lblPanah.setVisible(false);
-                card.setLayoutX((W - 360) / 2);
+                card.setLayoutX((W - cardWidth) / 2);
                 card.setLayoutY((H - 220) / 2);
             }
 
-            // Animasi membesar pada kartu setiap pindah langkah
+            // Animasi membesar pada kartu & pantulan ceria pada maskot setiap pindah langkah
             card.setScaleX(0.9);
             card.setScaleY(0.9);
             ScaleTransition pop = new ScaleTransition(Duration.millis(240), card);
@@ -311,6 +322,8 @@ public class ModernPopup {
             pop.setToY(1.0);
             pop.setInterpolator(Interpolator.SPLINE(0.18, 0.89, 0.32, 1.15));
             pop.play();
+
+            maskotTutorial.animasiMasukMemantul();
         };
 
         // Jalankan sedikit tertunda agar layout sudah selesai dihitung JavaFX
